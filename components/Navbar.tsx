@@ -7,6 +7,7 @@ import { useAuth } from "@/components/AuthProvider";
 const LINKS = [
   { href: "/", label: "Dashboard" },
   { href: "/expenses", label: "Expenses" },
+  { href: "/insights", label: "Insights" },
 ];
 
 export function Navbar() {

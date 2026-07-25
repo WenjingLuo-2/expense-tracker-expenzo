@@ -93,3 +93,40 @@ export function averagePerDay(expenses: Expense[]): number {
   const dayOfMonth = now.getDate();
   return sumAmount(monthExpenses) / dayOfMonth;
 }
+
+/** Expenses whose date falls in the current calendar month. */
+export function currentMonthExpenses(expenses: Expense[]): Expense[] {
+  const key = currentMonthKey();
+  return expenses.filter((e) => e.date.startsWith(key));
+}
+
+/**
+ * Consecutive days ending today whose total spending stayed at or under
+ * `dailyBudget`. Days with no expenses count as under budget. Counting stops at
+ * the first over-budget day, and never goes back before the first tracked
+ * expense (so a brand-new account doesn't report an inflated streak).
+ */
+export function budgetStreak(expenses: Expense[], dailyBudget: number): number {
+  if (dailyBudget <= 0 || expenses.length === 0) return 0;
+
+  const perDay = new Map<string, number>();
+  let earliest = expenses[0].date;
+  for (const e of expenses) {
+    perDay.set(e.date, (perDay.get(e.date) ?? 0) + e.amount);
+    if (e.date < earliest) earliest = e.date;
+  }
+
+  let streak = 0;
+  const cursor = new Date();
+  for (let guard = 0; guard < 400; guard++) {
+    const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}-${String(cursor.getDate()).padStart(2, "0")}`;
+    if (key < earliest) break; // don't count before tracking started
+    if ((perDay.get(key) ?? 0) <= dailyBudget) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
