@@ -9,6 +9,7 @@ export interface NewExpense {
   amount: number;
   category: Category;
   description: string;
+  tag: string;
 }
 
 interface UseExpensesResult {

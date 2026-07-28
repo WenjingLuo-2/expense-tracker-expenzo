@@ -44,7 +44,12 @@ export function ExpenseList({ expenses, onEdit, onDelete }: Props) {
               <td className="whitespace-nowrap px-5 py-3.5 text-slate-500">
                 {formatDate(e.date)}
               </td>
-              <td className="px-5 py-3.5 font-medium text-slate-800">{e.description}</td>
+              <td className="px-5 py-3.5 font-medium text-slate-800">
+                <span className="inline-flex items-center gap-2">
+                  {e.description}
+                  {e.tag && <TagChip tag={e.tag} />}
+                </span>
+              </td>
               <td className="px-5 py-3.5">
                 <CategoryBadge category={e.category} />
               </td>
@@ -65,8 +70,9 @@ export function ExpenseList({ expenses, onEdit, onDelete }: Props) {
           <li key={e.id} className="flex items-start justify-between gap-3 px-4 py-3.5">
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-slate-800">{e.description}</p>
-              <div className="mt-1.5 flex items-center gap-2">
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
                 <CategoryBadge category={e.category} />
+                {e.tag && <TagChip tag={e.tag} />}
                 <span className="text-xs text-slate-400">{formatDate(e.date)}</span>
               </div>
             </div>
@@ -80,6 +86,15 @@ export function ExpenseList({ expenses, onEdit, onDelete }: Props) {
         ))}
       </ul>
     </div>
+  );
+}
+
+function TagChip({ tag }: { tag: string }) {
+  return (
+    <span className="inline-flex items-center gap-0.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+      <span aria-hidden>#</span>
+      {tag}
+    </span>
   );
 }
 

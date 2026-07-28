@@ -12,6 +12,7 @@ interface ApiExpense {
   amountCents: number;
   category: Expense["category"];
   description: string;
+  tag: string;
   createdAt: string;
 }
 
@@ -22,6 +23,7 @@ function toExpense(a: ApiExpense): Expense {
     amount: a.amountCents / 100, // cents -> dollars
     category: a.category,
     description: a.description,
+    tag: a.tag ?? "",
     createdAt: a.createdAt,
   };
 }
@@ -32,6 +34,7 @@ function toApiBody(input: NewExpense) {
     amountCents: Math.round(input.amount * 100), // dollars -> cents
     category: input.category,
     description: input.description,
+    tag: input.tag,
   };
 }
 

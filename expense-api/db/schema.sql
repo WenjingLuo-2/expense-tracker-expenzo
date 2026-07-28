@@ -17,8 +17,10 @@ CREATE TABLE IF NOT EXISTS expenses (
     amount_cents BIGINT      NOT NULL CHECK (amount_cents > 0),
     category     TEXT        NOT NULL,
     description  TEXT        NOT NULL,
+    tag          TEXT        NOT NULL DEFAULT '',      -- optional free-text label; '' = none
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Every listing query filters by user_id, so it leads the index.
 CREATE INDEX IF NOT EXISTS idx_expenses_user ON expenses (user_id, date DESC, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_expenses_user_tag ON expenses (user_id, tag);

@@ -24,6 +24,7 @@ export function filterExpenses(
     }
     if (filters.startDate && e.date < filters.startDate) return false;
     if (filters.endDate && e.date > filters.endDate) return false;
+    if (filters.tag && e.tag !== filters.tag) return false;
     if (search) {
       const haystack = `${e.description} ${e.category}`.toLowerCase();
       if (!haystack.includes(search)) return false;

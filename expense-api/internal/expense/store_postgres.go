@@ -18,7 +18,7 @@ func NewPostgresStore(pool *pgxpool.Pool) *PostgresStore {
 	return &PostgresStore{pool: pool}
 }
 
-const columns = `id, user_id, date, amount_cents, category, description, created_at`
+const columns = `id, user_id, date, amount_cents, category, description, tag, created_at`
 
 func scanExpense(row pgx.Row) (Expense, error) {
 	var (
@@ -26,7 +26,7 @@ func scanExpense(row pgx.Row) (Expense, error) {
 		d   time.Time
 		cat string
 	)
-	if err := row.Scan(&e.ID, &e.UserID, &d, &e.AmountCents, &cat, &e.Description, &e.CreatedAt); err != nil {
+	if err := row.Scan(&e.ID, &e.UserID, &d, &e.AmountCents, &cat, &e.Description, &e.Tag, &e.CreatedAt); err != nil {
 		return Expense{}, err
 	}
 	e.Date = d.Format("2006-01-02")
@@ -71,17 +71,17 @@ func (s *PostgresStore) Get(userID, id string) (Expense, error) {
 
 func (s *PostgresStore) Create(e Expense) error {
 	_, err := s.pool.Exec(context.Background(),
-		`INSERT INTO expenses (id, user_id, date, amount_cents, category, description, created_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		e.ID, e.UserID, e.Date, e.AmountCents, string(e.Category), e.Description, e.CreatedAt)
+		`INSERT INTO expenses (id, user_id, date, amount_cents, category, description, tag, created_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+		e.ID, e.UserID, e.Date, e.AmountCents, string(e.Category), e.Description, e.Tag, e.CreatedAt)
 	return err
 }
 
 func (s *PostgresStore) Update(e Expense) error {
 	tag, err := s.pool.Exec(context.Background(),
-		`UPDATE expenses SET date = $3, amount_cents = $4, category = $5, description = $6
+		`UPDATE expenses SET date = $3, amount_cents = $4, category = $5, description = $6, tag = $7
 		 WHERE id = $1 AND user_id = $2`,
-		e.ID, e.UserID, e.Date, e.AmountCents, string(e.Category), e.Description)
+		e.ID, e.UserID, e.Date, e.AmountCents, string(e.Category), e.Description, e.Tag)
 	if err != nil {
 		return err
 	}

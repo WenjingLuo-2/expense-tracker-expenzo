@@ -22,6 +22,7 @@ export function ExpenseForm({ initial, onSubmit, onCancel }: ExpenseFormProps) {
     amount: initial ? String(initial.amount) : "",
     category: initial?.category ?? "Food",
     description: initial?.description ?? "",
+    tag: initial?.tag ?? "",
   });
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -75,6 +76,7 @@ export function ExpenseForm({ initial, onSubmit, onCancel }: ExpenseFormProps) {
         amount: Math.round(Number(form.amount) * 100) / 100,
         category: form.category,
         description: form.description.trim(),
+        tag: form.tag.trim(),
       });
     } finally {
       // Re-enable the button whether the save succeeded or failed (on failure
@@ -168,6 +170,22 @@ export function ExpenseForm({ initial, onSubmit, onCancel }: ExpenseFormProps) {
           aria-invalid={Boolean(errors.description)}
         />
         <FieldError message={errors.description} />
+      </div>
+
+      {/* Tag (optional) */}
+      <div>
+        <label htmlFor="tag" className="mb-1.5 block text-sm font-medium text-slate-700">
+          Tag <span className="font-normal text-slate-400">(optional)</span>
+        </label>
+        <input
+          id="tag"
+          type="text"
+          placeholder="e.g. vacation, work, groceries"
+          maxLength={40}
+          value={form.tag}
+          onChange={(e) => update("tag", e.target.value)}
+          className={fieldClass(undefined)}
+        />
       </div>
 
       <div className="flex gap-3 pt-2">

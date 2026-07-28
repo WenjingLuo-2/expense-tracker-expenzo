@@ -9,11 +9,12 @@ function escapeCell(value: string | number): string {
 }
 
 export function expensesToCsv(expenses: Expense[]): string {
-  const header = ["Date", "Category", "Description", "Amount"];
+  const header = ["Date", "Category", "Description", "Tag", "Amount"];
   const rows = expenses.map((e) => [
     e.date,
     e.category,
     e.description,
+    e.tag,
     e.amount.toFixed(2),
   ]);
   return [header, ...rows].map((row) => row.map(escapeCell).join(",")).join("\r\n");

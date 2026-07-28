@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-const maxAmountCents = 100_000_000 // $1,000,000.00 — a sanity ceiling
+const (
+	maxAmountCents = 100_000_000 // $1,000,000.00 — a sanity ceiling
+	maxTagLen      = 40
+)
 
 type IDGenerator func() string
 type Clock func() time.Time
@@ -28,6 +31,7 @@ type CreateInput struct {
 	AmountCents int64    `json:"amountCents"`
 	Category    Category `json:"category"`
 	Description string   `json:"description"`
+	Tag         string   `json:"tag"`
 }
 
 type ValidationError struct {
@@ -39,28 +43,36 @@ func (e ValidationError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Field, e.Message)
 }
 
-// validate returns the cleaned description and a ValidationError (or nil).
-func validate(in CreateInput) (string, error) {
+// validate returns the cleaned description and tag, and a ValidationError (or
+// nil). The tag is optional; an empty tag is valid.
+func validate(in CreateInput) (desc string, tag string, err error) {
 	if in.AmountCents <= 0 {
-		return "", ValidationError{Field: "amountCents", Message: "must be greater than 0"}
+		return "", "", ValidationError{Field: "amountCents", Message: "must be greater than 0"}
 	}
 	if in.AmountCents > maxAmountCents {
-		return "", ValidationError{Field: "amountCents", Message: "amount is too large"}
+		return "", "", ValidationError{Field: "amountCents", Message: "amount is too large"}
 	}
 	if !in.Category.Valid() {
-		return "", ValidationError{Field: "category", Message: "unknown category"}
+		return "", "", ValidationError{Field: "category", Message: "unknown category"}
 	}
-	desc := strings.TrimSpace(in.Description)
+
+	desc = strings.TrimSpace(in.Description)
 	if desc == "" {
-		return "", ValidationError{Field: "description", Message: "description is required"}
+		return "", "", ValidationError{Field: "description", Message: "description is required"}
 	}
 	if len(desc) > 120 {
-		return "", ValidationError{Field: "description", Message: "description is too long"}
+		return "", "", ValidationError{Field: "description", Message: "description is too long"}
 	}
+
+	tag = strings.TrimSpace(in.Tag)
+	if len(tag) > maxTagLen {
+		return "", "", ValidationError{Field: "tag", Message: "tag is too long"}
+	}
+
 	if _, err := time.Parse("2006-01-02", in.Date); err != nil {
-		return "", ValidationError{Field: "date", Message: "date must be YYYY-MM-DD"}
+		return "", "", ValidationError{Field: "date", Message: "date must be YYYY-MM-DD"}
 	}
-	return desc, nil
+	return desc, tag, nil
 }
 
 func (s *Service) List(userID string) ([]Expense, error) {
@@ -68,7 +80,7 @@ func (s *Service) List(userID string) ([]Expense, error) {
 }
 
 func (s *Service) Create(userID string, in CreateInput) (Expense, error) {
-	desc, err := validate(in)
+	desc, tag, err := validate(in)
 	if err != nil {
 		return Expense{}, err
 	}
@@ -79,6 +91,7 @@ func (s *Service) Create(userID string, in CreateInput) (Expense, error) {
 		AmountCents: in.AmountCents,
 		Category:    in.Category,
 		Description: desc,
+		Tag:         tag,
 		CreatedAt:   s.now(),
 	}
 	if err := s.store.Create(e); err != nil {
@@ -88,7 +101,7 @@ func (s *Service) Create(userID string, in CreateInput) (Expense, error) {
 }
 
 func (s *Service) Update(userID, id string, in CreateInput) (Expense, error) {
-	desc, err := validate(in)
+	desc, tag, err := validate(in)
 	if err != nil {
 		return Expense{}, err
 	}
@@ -101,6 +114,7 @@ func (s *Service) Update(userID, id string, in CreateInput) (Expense, error) {
 	existing.AmountCents = in.AmountCents
 	existing.Category = in.Category
 	existing.Description = desc
+	existing.Tag = tag
 	if err := s.store.Update(existing); err != nil {
 		return Expense{}, err
 	}

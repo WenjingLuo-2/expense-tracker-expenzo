@@ -20,6 +20,7 @@ const EMPTY_FILTERS: Filters = {
   category: "All",
   startDate: "",
   endDate: "",
+  tag: "",
 };
 
 export default function ExpensesPage() {
@@ -37,6 +38,10 @@ export default function ExpensesPage() {
     [expenses, filters],
   );
   const filteredTotal = useMemo(() => sumAmount(filtered), [filtered]);
+  const tags = useMemo(
+    () => Array.from(new Set(expenses.map((e) => e.tag).filter(Boolean))).sort(),
+    [expenses],
+  );
 
   function openAdd() {
     setEditing(null);
@@ -132,6 +137,7 @@ export default function ExpensesPage() {
         onChange={setFilters}
         resultCount={filtered.length}
         totalCount={expenses.length}
+        tags={tags}
       />
 
       <ExpenseList expenses={filtered} onEdit={openEdit} onDelete={setDeleting} />

@@ -14,6 +14,8 @@ export interface Expense {
   amount: number;
   category: Category;
   description: string;
+  /** Optional free-text label; can be shared across categories. "" = none */
+  tag: string;
   /** ISO timestamp of when the record was created */
   createdAt: string;
 }
@@ -24,6 +26,7 @@ export interface ExpenseInput {
   amount: string;
   category: Category;
   description: string;
+  tag: string;
 }
 
 export interface ExpenseFilters {
@@ -31,4 +34,6 @@ export interface ExpenseFilters {
   category: Category | "All";
   startDate: string;
   endDate: string;
+  /** Selected tag to filter by; "" = all tags */
+  tag: string;
 }

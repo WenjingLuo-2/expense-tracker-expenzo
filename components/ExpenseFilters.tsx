@@ -8,9 +8,11 @@ interface Props {
   onChange: (filters: Filters) => void;
   resultCount: number;
   totalCount: number;
+  /** Distinct tags the user has used, for the tag dropdown. */
+  tags: string[];
 }
 
-export function ExpenseFilters({ filters, onChange, resultCount, totalCount }: Props) {
+export function ExpenseFilters({ filters, onChange, resultCount, totalCount, tags }: Props) {
   const set = <K extends keyof Filters>(key: K, value: Filters[K]) =>
     onChange({ ...filters, [key]: value });
 
@@ -18,10 +20,11 @@ export function ExpenseFilters({ filters, onChange, resultCount, totalCount }: P
     filters.search !== "" ||
     filters.category !== "All" ||
     filters.startDate !== "" ||
-    filters.endDate !== "";
+    filters.endDate !== "" ||
+    filters.tag !== "";
 
   const reset = () =>
-    onChange({ search: "", category: "All", startDate: "", endDate: "" });
+    onChange({ search: "", category: "All", startDate: "", endDate: "", tag: "" });
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card">
@@ -64,6 +67,27 @@ export function ExpenseFilters({ filters, onChange, resultCount, totalCount }: P
             {CATEGORY_NAMES.map((c) => (
               <option key={c} value={c}>
                 {c}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Tag */}
+        <div className="md:w-44">
+          <label htmlFor="tag" className="mb-1 block text-xs font-medium text-slate-500">
+            Tag
+          </label>
+          <select
+            id="tag"
+            value={filters.tag}
+            onChange={(e) => set("tag", e.target.value)}
+            disabled={tags.length === 0}
+            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:opacity-50"
+          >
+            <option value="">All tags</option>
+            {tags.map((t) => (
+              <option key={t} value={t}>
+                {t}
               </option>
             ))}
           </select>

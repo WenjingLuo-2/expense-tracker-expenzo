@@ -40,5 +40,6 @@ type Expense struct {
 	AmountCents int64     `json:"amountCents"` // e.g. $12.34 -> 1234
 	Category    Category  `json:"category"`
 	Description string    `json:"description"`
+	Tag         string    `json:"tag"` // optional free-text label; "" = none
 	CreatedAt   time.Time `json:"createdAt"`
 }
